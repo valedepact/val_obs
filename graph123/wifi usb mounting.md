@@ -293,3 +293,60 @@ sudo mokutil --disable-validation
 ```
 then reboot
 
+---
+
+# USB Storage: Mounting & Diagnosing a Bad Drive
+
+## Mounting a USB drive (Linux)
+
+```bash
+lsblk -o NAME,SIZE,TYPE,TRAN,MODEL,STATE   # list block devices, find the new one (TRAN=usb)
+sudo mkdir -p /mnt/usb                     # create a mount point
+sudo mount /dev/sdX1 /mnt/usb              # mount the partition (replace sdX1 with actual device)
+ls /mnt/usb                                # browse the files
+
+sudo umount /mnt/usb                       # unmount when done (always do this before unplugging)
+```
+
+Or, without needing a manual mount point (auto-handled by udisks/desktop):
+
+```bash
+udisksctl mount -b /dev/sdX1               # mounts via udisks, no sudo needed
+udisksctl unmount -b /dev/sdX1             # unmount via udisks
+```
+
+If `blkid`/`udisksctl info` shows empty `IdType`/`IdLabel`/`IdUsage` for the
+partition, there's no recognizable filesystem on it - mounting will fail.
+
+## Diagnosing a USB drive that won't format/clean (Windows "device not ready")
+
+1. **Check it from Linux first** - plug it in and compare before/after:
+   ```bash
+   lsblk -o NAME,SIZE,TYPE,TRAN,MODEL,STATE
+   ```
+2. **Inspect the partition for a real filesystem**:
+   ```bash
+   udisksctl info -b /dev/sdX1
+   ```
+   Empty `IdType`/`IdLabel`/`IdUsage` = no filesystem detected.
+3. **Check the real, physical capacity** (this is the key test for fake/counterfeit
+   flash drives that report a false size):
+   ```bash
+   sudo apt install f3 -y
+   sudo f3probe --destructive --time-ops /dev/sdX
+   ```
+   `--destructive` erases the drive during testing - only run this if you don't
+   need the existing data (a drive with no detected filesystem has nothing
+   safely recoverable anyway).
+
+   Example real result from a fake SSD:
+   ```
+   Bad news: The device `/dev/sdb' is damaged
+   *Usable* size: 0.00 Byte (0 blocks)
+   Announced size: 122.07 TB (32768000000 blocks)
+   ```
+   Announced size wildly larger than any real drive (e.g. claiming terabytes on
+   a cheap USB stick), combined with 0 usable bytes, confirms the drive is fake
+   or completely dead - not a formatting/software issue. No diskpart/mkfs
+   command can fix this; the hardware itself can't store data.
+
