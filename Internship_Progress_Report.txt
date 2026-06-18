@@ -56,6 +56,52 @@ d) Virtualization / Sandbox - VirtualBox
      (libwireshark 4.6.6), gpg, sshd
 
 ------------------------------------------------------------
+3b. ADDITIONAL WORK SINCE INITIAL REPORT
+
+e) Version Control / GitHub Workflow
+   - Set up Git/GitHub access via SSH using a generated ed25519 key
+   - Routed SSH over port 443 (ssh.github.com) to work around a
+     network restriction blocking the default port 22
+   - Configured ~/.ssh/config with a Host entry for github.com
+   - Added the public key to GitHub as a deploy key scoped to the
+     val_obs repository
+   - Vaults (graph123, T2H), the progress report, an issues log, and
+     supporting documentation pushed and version-controlled at
+     github.com/valedepact/val_obs
+
+f) Secrets Handling / Security Hygiene
+   - GitHub's push protection caught a real OpenAI API key left in
+     plaintext inside a vault note before it reached public history
+   - Key was redacted and the commit amended prior to a successful push
+   - Recommended revoking the exposed key on the provider's dashboard
+     as a precaution
+   - Lesson captured in issues.txt for future reference
+
+g) USB / Storage Device Diagnostics
+   - Investigated a Windows diskpart failure ("device is not ready")
+     on an external SSD
+   - Diagnosed using lsblk, udisksctl, and f3probe (F3 tooling)
+   - Result: drive reported a false capacity (122 TB) with 0 bytes of
+     actual usable/working storage - confirmed as a fake-capacity or
+     non-functional device, not a software/formatting issue
+   - Findings and general USB mounting/diagnosis steps documented in
+     the Obsidian vault for future reference
+
+h) Documentation Produced (Obsidian vault: graph123)
+   - install-ollama.md, install-obsidian.md, install-virtualbox.md,
+     install-openvpn.md - step-by-step install commands with inline
+     comments
+   - install-claude-code.md - Claude Code CLI install/activation,
+     plus general SSH key generation reference
+   - troubleshooting-common-issues.md - fixes for Ollama, Obsidian,
+     VirtualBox, OpenVPN, and combined GNOME/XFCE desktop issues
+   - blackarch-todo.md - setup checklist for the BlackArch machine,
+     starting with AI automation tooling, followed by the same stack
+     installed here (Arch/pacman equivalents)
+   - wifi usb mounting.md - extended with general USB mount commands
+     and the SSD diagnostic procedure above
+
+------------------------------------------------------------
 4. NOTES FOR SUPERVISOR
 
    - All items listed under "today's tasks" (AI, VPN, VirtualBox/
@@ -67,3 +113,9 @@ d) Virtualization / Sandbox - VirtualBox
      started on demand for demonstration.
    - Documentation of the work is preserved in Obsidian vaults and
      version-controlled on GitHub for traceability.
+   - Security awareness was demonstrated in practice: a leaked API
+     key was caught and remediated before reaching public history.
+   - Diagnostic/troubleshooting skills were applied beyond the
+     original task list (e.g. identifying a fake-capacity USB drive
+     through direct hardware-level testing rather than assuming a
+     software fault).
