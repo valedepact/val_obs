@@ -1,0 +1,53 @@
+ISSUES ENCOUNTERED AND RESOLUTIONS
+====================================
+
+1. API Connection Refused
+   Issue:    Claude Code reported "Unable to connect to API (ConnectionRefused)".
+   Cause:    Transient network blip (no proxy misconfiguration or DNS issue found
+             on inspection - api.anthropic.com resolved and connected fine
+             immediately after).
+   Resolution: Retried; connection succeeded. No persistent fix needed since the
+             machine had no proxy env vars set and DNS/TLS worked correctly on
+             retest.
+
+2. SSH Port 22 Blocked
+   Issue:    SSH authentication test to GitHub over the default port 22 failed
+             with "Connection timed out".
+   Cause:    Network/firewall on this machine blocks outbound port 22.
+   Resolution: Configured SSH to connect to GitHub via ssh.github.com on port 443
+             instead, using a Host entry in ~/.ssh/config:
+                 Host github.com
+                   HostName ssh.github.com
+                   Port 443
+                   User git
+                   IdentityFile ~/.ssh/id_ed25519_github
+                   IdentitiesOnly yes
+
+3. SSH Key Scoped to Single Repo (Deploy Key)
+   Issue:    After adding the SSH public key, GitHub greeted the connection as
+             "valedepact/val_obs" instead of the account username.
+   Cause:    The key was added as a deploy key for the val_obs repo only, not as
+             an account-wide SSH key.
+   Resolution: Not blocking for this task since only val_obs needed pushing to;
+             noted that the same key will not work for other repos and a new
+             key (or account-level key) would be needed if that's required later.
+
+4. GitHub Push Protection - Leaked API Key
+   Issue:    Push to GitHub was rejected with "GH013: Repository rule
+             violations... Push cannot contain secrets" - a real OpenAI API key
+             was detected in graph123/wormgpt.md.
+   Cause:    A real OpenAI API key had been left in plaintext in a vault note.
+   Resolution: Redacted the key from the file, amended the commit (push had not
+             yet succeeded, so no public history was affected), and pushed again
+             successfully. Recommended revoking the exposed key on OpenAI's
+             dashboard since it had been stored in plaintext.
+
+5. Ineffective First Redaction Attempt
+   Issue:    An initial attempt to obscure the leaked key by inserting quoted
+             characters (e.g. "W", "6", "v") into the string did not actually
+             remove the original characters - the real key was still fully
+             recoverable.
+   Resolution: Flagged that the obfuscation was cosmetic only and did not
+             neutralize the key; replaced the key outright with a clear
+             placeholder ([REDACTED-OPENAI-KEY]) where genuine redaction was
+             needed.
