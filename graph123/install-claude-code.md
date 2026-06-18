@@ -44,6 +44,56 @@ account. Once approved, credentials are stored locally at:
 No `ANTHROPIC_API_KEY` env var is required for this flow - it's only needed if
 authenticating via direct API key instead of an account login.
 
+## Generating an SSH Key (for GitHub access)
+
+```bash
+ssh-keygen -t ed25519 -C "your_email@example.com" -f ~/.ssh/id_ed25519_github -N ""
+```
+
+- `-t ed25519`  - key algorithm (modern, fast, secure; GitHub's recommended type)
+- `-C "..."`    - comment/label embedded in the key, usually your email
+- `-f ...`      - file path/name to save the key (avoids overwriting a default key)
+- `-N ""`       - empty passphrase, so the key works without prompting each time
+
+This creates two files:
+- `~/.ssh/id_ed25519_github`     - private key, stays on this machine, never shared
+- `~/.ssh/id_ed25519_github.pub` - public key, paste this into GitHub (Settings -> SSH
+  and GPG keys, or a repo's Deploy keys)
+
+```bash
+cat ~/.ssh/id_ed25519_github.pub          # view the public key to copy/paste
+```
+
+If port 22 is blocked on the network, force SSH over port 443 instead by adding to
+`~/.ssh/config`:
+
+```
+Host github.com
+  HostName ssh.github.com
+  Port 443
+  User git
+  IdentityFile ~/.ssh/id_ed25519_github
+  IdentitiesOnly yes
+```
+
+```bash
+ssh -T git@github.com                     # test the connection once the key is added
+```
+
+### Note: this command works for any SSH key, not just GitHub
+
+The same `ssh-keygen` command is used for any service needing SSH key auth
+(GitLab, Bitbucket, remote servers/VPS, etc.) - not just GitHub. What can change
+depending on the situation:
+
+- `-t ed25519` - fine for almost everything modern; very old servers may only
+  support RSA, in which case use `-t rsa -b 4096` instead
+- `-f path`    - only needed if you want a separate/named key; without it,
+  ssh-keygen uses the default filename and may overwrite an existing default key
+- `-N ""`      - empty passphrase, convenient for automation; for a personal key
+  you log into manually, use a real passphrase instead for better security
+- `-C "..."`   - just a label, never affects function, can be anything or omitted
+
 ## Update / reinstall
 
 ```bash
