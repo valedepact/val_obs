@@ -1,0 +1,83 @@
+SESSION SUMMARY: Setting Up an App Launcher on Kali Linux (XFCE)
+================================================================
+Date: June 17, 2026
+
+GOAL
+----
+The user wanted a visual way to organize and access desktop apps on their 
+Linux machine — something like a taskbar or dock that sits on screen and 
+displays app icons permanently.
+
+SYSTEM IDENTIFIED
+-----------------
+- OS: Kali Linux (Rolling)
+- Desktop Environment: XFCE (confirmed via $XDG_CURRENT_DESKTOP = XFCE)
+- Session: lightdm-xsession
+- Panel already running: xfce4-panel
+
+APPROACHES TRIED
+----------------
+
+1. Ulauncher (search-based launcher)
+   - Attempted: sudo apt install ulauncher
+   - Result: Package not found in repos initially
+   - Later found in repos but user preferred a visual/permanent dock
+
+2. Albert (search-based launcher)
+   - Attempted: sudo apt install albert
+   - Result: Package not found in Kali repos
+
+3. Rofi (search-based launcher)
+   - Available in repos but user wanted something visual, not search-based
+
+4. Plank (dock)
+   - Attempted: sudo apt install plank
+   - Result: Package not found in Kali repos
+   - Attempted manual .deb download from ftp.debian.org
+   - Result: Connection timed out (network restrictions)
+
+5. Cairo-Dock (animated dock)
+   - Attempted: sudo apt install cairo-dock
+   - Result: Package not found in Kali repos
+
+6. Crystal-Dock (visual dock)
+   - Successfully installed: sudo apt install crystal-dock
+   - Result: Launched but reported "Unsupported platform" (requires KDE/Wayland)
+
+7. Gnome-Pie (pie menu launcher)
+   - Successfully installed: sudo apt install gnome-pie
+   - Result: Launched successfully with some non-critical warnings
+   - Works via keyboard shortcut (Ctrl+Alt+Space) to show a circular app menu
+   - Not a permanent dock but a triggered visual launcher
+
+FINAL SOLUTION
+--------------
+Use the built-in XFCE Panel (xfce4-panel) to pin app launchers directly 
+to the existing taskbar. This requires no additional installation.
+
+HOW TO PIN APPS TO THE XFCE PANEL:
+  Option A (quick):
+    - Right-click any app in the application menu
+    - Select "Add to Panel"
+
+  Option B (manual):
+    1. Right-click the panel → Panel → Add New Items
+    2. Select "Launcher" → click Add
+    3. Right-click the new launcher on the panel → Properties
+    4. Click "+" → search for and select your app
+    5. Repeat for each app you want pinned
+
+WHY THIS WORKS BEST
+-------------------
+- xfce4-panel is already installed and running on the system
+- No additional packages needed
+- Icons sit permanently on screen, exactly like a dock/taskbar
+- Stable and fully supported on XFCE/Kali
+- No network access or external repos required
+
+LESSONS LEARNED
+---------------
+- Kali Linux repos are security-tool focused; many common desktop utilities 
+  (Plank, Cairo-Dock, Albert) are not included
+- Network access to external Debian mirrors was restricted, limiting manual installs
+- The simplest solution was already available via the existing XFCE panel
